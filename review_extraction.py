@@ -26,7 +26,7 @@ def iteration(url):
     get_image = GetImage(soup,comic_title)
     plist = pagecount.findAll('p')
     pattern = re.compile("レビュー数:(.+)人")
-    #print comic_title.text #タイトル名
+    print comic_title #タイトル名
     m = pattern.search(str(plist[0]))
     if m:
         review_point = m.group(1)
@@ -38,9 +38,9 @@ def iteration(url):
 def abstraction(user_number,iteration_count):
     word  = []
     user_count = []
-    #print iteration_count #回数
+    print iteration_count #回数
     user_count.append(str(user_number))
-   # print str(user_number)
+    print str(user_number)
     for i in range(1,int(iteration_count)):
         url2 = "http://www.manngareview.com/comics/show/3988/page:"+ str(i) +"/limit:5/u_sort:modified/netabare:yes"
         #"+ str(i) +"
@@ -48,7 +48,7 @@ def abstraction(user_number,iteration_count):
             htmldata2 = urllib2.urlopen(url2)
             soup = BeautifulSoup(htmldata2)
             for review_sentence in soup('p',{'class':'review_string'}):
-                #print review_sentence.text #本文
+                print review_sentence.text #本文
                 word.append(review_sentence.text)
         except urllib2.HTTPError,e:
             print e.code,e.msg
