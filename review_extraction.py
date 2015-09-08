@@ -7,12 +7,15 @@ import urllib2
 import unicodedata
 import re
 import codecs
+import csv
+
 
 def GetImage(soup,title):
+
     for i in soup.findAll("div",{"id":"comic_image"}):
         image = i.find("img")["src"] 
         try:
-            urllib.urlretrieve(image,"masterthesis_image/" + title + ".jpg")
+            urllib.urlretrieve(image,"../masterthesis_image/" + title + ".jpg")
         except IOError as error:
             print error
 
@@ -24,6 +27,7 @@ def iteration(url):
     pagecount   = soup.find('div',{'id':'comic_data_area'})
 
     get_image = GetImage(soup,comic_title)
+    
     plist = pagecount.findAll('p')
     pattern = re.compile("レビュー数:(.+)人")
     print comic_title #タイトル名
@@ -35,14 +39,14 @@ def iteration(url):
         else:
             return int(review_point),(int(review_point)/5+2),comic_title
 
-def abstraction(user_number,iteration_count):
+def abstraction(user_number,iteration_count,id):
     word  = []
     user_count = []
-    print iteration_count #回数
+    #print iteration_count #回数
     user_count.append(str(user_number))
     print str(user_number)
     for i in range(1,int(iteration_count)):
-        url2 = "http://www.manngareview.com/comics/show/3988/page:"+ str(i) +"/limit:5/u_sort:modified/netabare:yes"
+        url2 = "http://www.manngareview.com/comics/show/" + id + "/page:"+ str(i) +"/limit:5/u_sort:modified/netabare:yes"
         #"+ str(i) +"
         try:
             htmldata2 = urllib2.urlopen(url2)
@@ -56,16 +60,33 @@ def abstraction(user_number,iteration_count):
             print e
     return user_count,word
 
+
 def main():
-    url = "http://www.manngareview.com/comics/show/3988/page:1/limit:5/u_sort:modified/netabare:yes"
-    iteration_count = iteration(url)
-    review_abstraction = abstraction(iteration_count[0],iteration_count[1])
-    s_data = codecs.open("masterthesis_review/"+ iteration_count[2] +".txt","w","utf-8")
-    for i in review_abstraction[0]:
-        s_data.write(i + "\n")
-    for i in review_abstraction[1]:
-        s_data.write(i + "\n")
-    s_data.close()
+
+    f = open("select_comic_id.csv","r")
+    reader = csv.reader(f)
+    for id_list in reader:
+        for id in id_list:
+            #extract_comic_id = "221"#抽出したい作品のidを付与
+            url = "http://www.manngareview.com/comics/show/" + id + "/page:1/limit:5/u_sort:modified/netabare:yes"
+            iteration_count = iteration(url)
+            review_abstraction = abstraction(iteration_count[0],iteration_count[1],id)
+            try:
+                s_data = codecs.open("../masterthesis_review/"+ iteration_count[2] +".txt","w","utf-8")
+            except (IOError,NameError):
+                print "例外検知"
+
+            for i in review_abstraction[0]:
+                try:
+                    s_data.write(i + "\n")
+                except IOError:
+                    print "例外検知"
+            for i in review_abstraction[1]:
+                try:
+                    s_data.write(i + "\n")
+                except IOError:
+                    print "例外検知"
+            s_data.close()
 
 if __name__ == "__main__":
     main()
