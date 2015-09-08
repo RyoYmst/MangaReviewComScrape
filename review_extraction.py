@@ -60,7 +60,6 @@ def abstraction(user_number,iteration_count,id):
             print e
     return user_count,word
 
-
 def main():
 
     f = open("select_comic_id.csv","r")
